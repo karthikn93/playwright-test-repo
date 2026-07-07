@@ -33,7 +33,7 @@ steps:
   # 4. AI Failure Narrator
   - script: |
       # Install GitHub Copilot CLI
-      npm install -g @github/copilot-cli
+      npm install -g @github/copilot
 
       # Run the AI narrator
       npx ts-node scripts/ai-failure-narrator.ts
