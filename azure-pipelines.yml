@@ -36,7 +36,7 @@ steps:
       npm install -g @github/copilot
 
       # Run the AI narrator
-      npx ts-node scripts/ai-failure-narrator.ts
+      npx tsx scripts/ai-failure-narrator.ts
     displayName: "🧠 AI Failure Narrator"
     condition: always() # Runs even if tests failed
     env:
