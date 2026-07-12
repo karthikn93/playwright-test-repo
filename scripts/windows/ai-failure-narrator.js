@@ -117,9 +117,16 @@ Note:
 function callCopilot(prompt) {
   console.log("🧠 Asking GitHub Copilot to analyze the test failures...");
 
+  // Log auth token presence (not the value) for debugging
+  console.log("🔑 GITHUB_TOKEN present:", !!process.env.GITHUB_TOKEN);
+
   // Use 'where' on Windows to check if Copilot CLI is installed
   try {
-    execSync("where copilot", { encoding: "utf-8" });
+    const copilotPath = execSync("where copilot", { encoding: "utf-8" }).trim();
+    console.log("✅ Copilot CLI found at:", copilotPath);
+    // Log the version to confirm it's the right package
+    const version = execSync("copilot --version", { encoding: "utf-8", env: { ...process.env } }).trim();
+    console.log("📦 Copilot version:", version);
   } catch {
     console.log("📦 Installing GitHub Copilot CLI...");
     execSync("npm install -g @github/copilot", { encoding: "utf-8" });
@@ -140,8 +147,14 @@ function callCopilot(prompt) {
       ["/c", "copilot", "-p", fs.readFileSync(tempFile, "utf-8"), "--deny-tool=shell(git:*)"],
       {
         encoding: "utf-8",
-        timeout: 45000,
+        timeout: 120000, // 2 minutes — Copilot may need time for first-run setup
         stdio: ["pipe", "pipe", "pipe"],
+        env: {
+          ...process.env,              // Inherit all existing env vars
+          GITHUB_TOKEN: process.env.GITHUB_TOKEN, // Explicitly forward auth token
+          GH_TOKEN: process.env.GITHUB_TOKEN,     // Some Copilot versions use GH_TOKEN
+          NO_COLOR: "1",              // Disable color output in non-interactive mode
+        },
       },
     );
 
