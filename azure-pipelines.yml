@@ -12,7 +12,7 @@ steps:
   # 1. Install Node.js
   - task: UseNode@1
     inputs:
-      version: "20.x"
+      version: "22.x"
     displayName: "Install Node.js"
 
   # 2. Install dependencies and Playwright browsers
@@ -30,7 +30,7 @@ steps:
   # 4. AI Failure Narrator (Windows script)
   - script: |
       npm install -g @github/copilot
-      node scripts\windows\ai-failure-narrator.js
+      node scripts\windows\ai-failure-narrator.js test-results.json
     displayName: "🧠 AI Failure Narrator"
     condition: always()
     env:

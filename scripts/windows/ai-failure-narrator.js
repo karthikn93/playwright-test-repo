@@ -398,8 +398,8 @@ async function main() {
     aiResponse = callCopilot(prompt);
   } catch (error) {
     console.error("❌ AI analysis failed:", error.message);
-    // console.log("📋 Using fallback analysis...");
-    // aiResponse = generateFallbackAnalysis(prompt);
+    console.log("📋 Using fallback analysis...");
+    aiResponse = generateFallbackAnalysis(prompt);
   }
 
   // Parse AI response
