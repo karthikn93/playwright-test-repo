@@ -1,13 +1,12 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+# Node.js - Cucumber + Playwright (Windows)
+# Runs Cucumber BDD tests using Playwright on a Windows agent
+# and narrates failures using GitHub Copilot CLI
 
 trigger:
   - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 steps:
   # 1. Install Node.js
@@ -16,44 +15,39 @@ steps:
       version: "20.x"
     displayName: "Install Node.js"
 
-  # 2. Install Playwright dependencies and browsers
+  # 2. Install dependencies and Playwright browsers
   - script: |
       npm ci
-      npx playwright install --with-deps
-    displayName: "Install dependencies & Playwright"
+      npx playwright install --with-deps chromium
+    displayName: "Install dependencies & Playwright browsers"
 
-  # 3. Run your Playwright tests (this step will continue even on failure)
+  # 3. Run Cucumber tests (continues even on failure so AI narrator still runs)
   - script: |
-      npx playwright test
-    displayName: "Run Playwright tests"
+      npm run test:cucumber
+    displayName: "Run Cucumber tests"
     continueOnError: true
-    env:
-      PLAYWRIGHT_JSON_OUTPUT_NAME: test-results.json
 
-  # 4. AI Failure Narrator
+  # 4. AI Failure Narrator (Windows script)
   - script: |
-      # Install GitHub Copilot CLI
       npm install -g @github/copilot
-
-      # Run the AI narrator
-      npx tsx scripts/ai-failure-narrator.ts
+      node scripts\windows\ai-failure-narrator.js
     displayName: "🧠 AI Failure Narrator"
-    condition: always() # Runs even if tests failed
+    condition: always()
     env:
-      GITHUB_TOKEN: $(GITHUB_TOKEN) # Optional: For Copilot authentication
+      GITHUB_TOKEN: $(GITHUB_TOKEN)
 
   # 5. Publish AI report as artifact
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: "ai-failure-report.json"
       ArtifactName: "AI-Failure-Analysis"
-    displayName: "Publish AI report"
+    displayName: "Publish AI Failure report"
     condition: always()
 
-  # 6. Publish Playwright report
+  # 6. Publish Cucumber JSON report as artifact
   - task: PublishBuildArtifacts@1
     inputs:
-      PathtoPublish: "test-results/"
-      ArtifactName: "Playwright-Report"
-    displayName: "Publish Playwright HTML report"
+      PathtoPublish: "test-results.json"
+      ArtifactName: "Cucumber-Test-Results"
+    displayName: "Publish Cucumber JSON report"
     condition: always()

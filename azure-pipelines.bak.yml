@@ -1,0 +1,59 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  # 1. Install Node.js
+  - task: UseNode@1
+    inputs:
+      version: "20.x"
+    displayName: "Install Node.js"
+
+  # 2. Install Playwright dependencies and browsers
+  - script: |
+      npm ci
+      npx playwright install --with-deps
+    displayName: "Install dependencies & Playwright"
+
+  # 3. Run your Playwright tests (this step will continue even on failure)
+  - script: |
+      npx playwright test
+    displayName: "Run Playwright tests"
+    continueOnError: true
+    env:
+      PLAYWRIGHT_JSON_OUTPUT_NAME: test-results.json
+
+  # 4. AI Failure Narrator
+  - script: |
+      # Install GitHub Copilot CLI
+      npm install -g @github/copilot
+
+      # Run the AI narrator
+      npx tsx scripts/ai-failure-narrator.ts
+    displayName: "🧠 AI Failure Narrator"
+    condition: always() # Runs even if tests failed
+    env:
+      GITHUB_TOKEN: $(GITHUB_TOKEN) # Optional: For Copilot authentication
+
+  # 5. Publish AI report as artifact
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "ai-failure-report.json"
+      ArtifactName: "AI-Failure-Analysis"
+    displayName: "Publish AI report"
+    condition: always()
+
+  # 6. Publish Playwright report
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "test-results/"
+      ArtifactName: "Playwright-Report"
+    displayName: "Publish Playwright HTML report"
+    condition: always()

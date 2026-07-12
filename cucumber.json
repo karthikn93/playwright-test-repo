@@ -1,0 +1,8 @@
+{
+  "default": {
+    "require": ["step-definitions/**/*.js"],
+    "format": ["progress-bar", "json:test-results.json"],
+    "paths": ["features/**/*.feature"],
+    "publishQuiet": true
+  }
+}
