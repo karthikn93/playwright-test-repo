@@ -28,13 +28,17 @@ steps:
     displayName: "Run Cucumber tests"
     continueOnError: true
 
-  # 4. AI Failure Narrator (Windows script)
+  # 4. Install GitHub Copilot CLI
+  - script: npm install -g @github/copilot
+    displayName: "Install GitHub Copilot CLI"
+    continueOnError: true
+
+  # 5. AI Failure Narrator (Windows script)
   - script: |
-      npm install -g @github/copilot
       echo "Node version:"
       node --version
       echo "Checking test-results.json exists:"
-      if exist test-results.json (echo "✅ Found test-results.json") else (echo "❌ test-results.json NOT found")
+      if exist test-results.json (echo Found test-results.json) else (echo test-results.json NOT found)
       echo "Running AI narrator..."
       node scripts\windows\ai-failure-narrator.js test-results.json
       echo "AI narrator finished with exit code: %ERRORLEVEL%"
