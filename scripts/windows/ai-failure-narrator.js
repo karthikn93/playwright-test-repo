@@ -132,7 +132,7 @@ function callCopilot(prompt) {
     fs.writeFileSync(tempFile, prompt, "utf-8");
 
     // Use spawnSync with args array — avoids shell escaping issues on Windows
-    // Reads prompt directly from file instead of using $(cat file) bash syntax
+    // shell: true is required on Windows so cmd.exe resolves copilot.cmd wrapper
     const result = spawnSync(
       "copilot",
       ["-p", fs.readFileSync(tempFile, "utf-8"), "--deny-tool=shell(git:*)"],
@@ -140,6 +140,7 @@ function callCopilot(prompt) {
         encoding: "utf-8",
         timeout: 45000,
         stdio: ["pipe", "pipe", "pipe"],
+        shell: true, // Required on Windows — npm global binaries are .cmd files
       },
     );
 
