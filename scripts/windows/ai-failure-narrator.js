@@ -125,7 +125,10 @@ function callCopilot(prompt) {
     const copilotPath = execSync("where copilot", { encoding: "utf-8" }).trim();
     console.log("✅ Copilot CLI found at:", copilotPath);
     // Log the version to confirm it's the right package
-    const version = execSync("copilot --version", { encoding: "utf-8", env: { ...process.env } }).trim();
+    const version = execSync("copilot --version", {
+      encoding: "utf-8",
+      env: { ...process.env },
+    }).trim();
     console.log("📦 Copilot version:", version);
   } catch {
     console.log("📦 Installing GitHub Copilot CLI...");
@@ -144,16 +147,22 @@ function callCopilot(prompt) {
     // multiline prompts (splits them as separate arguments).
     const result = spawnSync(
       "cmd.exe",
-      ["/c", "copilot", "-p", fs.readFileSync(tempFile, "utf-8"), "--deny-tool=shell(git:*)"],
+      [
+        "/c",
+        "copilot",
+        "-p",
+        fs.readFileSync(tempFile, "utf-8"),
+        "--deny-tool=shell(git:*)",
+      ],
       {
         encoding: "utf-8",
         timeout: 120000, // 2 minutes — Copilot may need time for first-run setup
         stdio: ["pipe", "pipe", "pipe"],
         env: {
-          ...process.env,              // Inherit all existing env vars
+          ...process.env, // Inherit all existing env vars
           GITHUB_TOKEN: process.env.GITHUB_TOKEN, // Explicitly forward auth token
-          GH_TOKEN: process.env.GITHUB_TOKEN,     // Some Copilot versions use GH_TOKEN
-          NO_COLOR: "1",              // Disable color output in non-interactive mode
+          GH_TOKEN: process.env.GITHUB_TOKEN, // Some Copilot versions use GH_TOKEN
+          NO_COLOR: "1", // Disable color output in non-interactive mode
         },
       },
     );
@@ -413,8 +422,10 @@ async function main() {
     aiResponse = callCopilot(prompt);
   } catch (error) {
     console.error("❌ AI analysis failed:", error.message);
-    console.log("📋 Using fallback analysis...");
-    aiResponse = generateFallbackAnalysis(prompt);
+    console.error(
+      "� Stopping — AI narrator cannot proceed without a valid AI response.",
+    );
+    process.exit(1);
   }
 
   // Parse AI response
