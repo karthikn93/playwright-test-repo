@@ -16,10 +16,11 @@ steps:
     displayName: "Install Node.js"
 
   # 2. Install dependencies and Playwright browsers
-  - script: |
-      npm ci
-      npx playwright install --with-deps chromium
-    displayName: "Install dependencies & Playwright browsers"
+  - script: npm ci
+    displayName: "Install dependencies"
+
+  - script: npx playwright install chromium
+    displayName: "Install Playwright Chromium browser"
 
   # 3. Run Cucumber tests (continues even on failure so AI narrator still runs)
   - script: |
@@ -30,7 +31,13 @@ steps:
   # 4. AI Failure Narrator (Windows script)
   - script: |
       npm install -g @github/copilot
+      echo "Node version:"
+      node --version
+      echo "Checking test-results.json exists:"
+      if exist test-results.json (echo "✅ Found test-results.json") else (echo "❌ test-results.json NOT found")
+      echo "Running AI narrator..."
       node scripts\windows\ai-failure-narrator.js test-results.json
+      echo "AI narrator finished with exit code: %ERRORLEVEL%"
     displayName: "🧠 AI Failure Narrator"
     condition: always()
     env:
