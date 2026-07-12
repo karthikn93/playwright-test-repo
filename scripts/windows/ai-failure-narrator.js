@@ -131,16 +131,17 @@ function callCopilot(prompt) {
     const tempFile = path.join(os.tmpdir(), "copilot-prompt.txt");
     fs.writeFileSync(tempFile, prompt, "utf-8");
 
-    // Use spawnSync with args array — avoids shell escaping issues on Windows
-    // shell: true is required on Windows so cmd.exe resolves copilot.cmd wrapper
+    // Invoke cmd.exe /c explicitly so it resolves copilot.cmd,
+    // while passing args as an array so Node handles quoting correctly.
+    // This avoids shell: true which joins args into a raw string and breaks
+    // multiline prompts (splits them as separate arguments).
     const result = spawnSync(
-      "copilot",
-      ["-p", fs.readFileSync(tempFile, "utf-8"), "--deny-tool=shell(git:*)"],
+      "cmd.exe",
+      ["/c", "copilot", "-p", fs.readFileSync(tempFile, "utf-8"), "--deny-tool=shell(git:*)"],
       {
         encoding: "utf-8",
         timeout: 45000,
         stdio: ["pipe", "pipe", "pipe"],
-        shell: true, // Required on Windows — npm global binaries are .cmd files
       },
     );
 
